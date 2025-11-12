@@ -3,28 +3,90 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { Button } from "@/components/ui/button";
+import { Moon, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
+import Dashboard from "@/pages/Dashboard";
+import IssuesPage from "@/pages/IssuesPage";
+import PartyPathsPage from "@/pages/PartyPathsPage";
+import CombatPage from "@/pages/CombatPage";
 import NotFound from "@/pages/not-found";
+
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    setIsDark(isDarkMode);
+  }, []);
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    if (newIsDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      data-testid="button-theme-toggle"
+    >
+      {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+    </Button>
+  );
+}
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
+      <Route path="/" component={Dashboard} />
+      <Route path="/issues" component={IssuesPage} />
+      <Route path="/party-paths" component={PartyPathsPage} />
+      <Route path="/combat" component={CombatPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-function App() {
+export default function App() {
+  const isAdmin = true;
+
+  const style = {
+    "--sidebar-width": "16rem",
+    "--sidebar-width-icon": "3rem",
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <SidebarProvider style={style as React.CSSProperties}>
+          <div className="flex h-screen w-full">
+            <AppSidebar isAdmin={isAdmin} />
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <header className="flex items-center justify-between px-6 py-4 border-b">
+                <SidebarTrigger data-testid="button-sidebar-toggle" />
+                <ThemeToggle />
+              </header>
+              <main className="flex-1 overflow-auto">
+                <div className="container max-w-7xl mx-auto px-6 py-8">
+                  <Router />
+                </div>
+              </main>
+            </div>
+          </div>
+        </SidebarProvider>
         <Toaster />
-        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;
