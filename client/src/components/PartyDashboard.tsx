@@ -3,12 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { CheckCircle2, Circle, AlertCircle, Swords } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface PartyStatus {
   party: string;
   totalEncounters: number;
   completedEncounters: number;
+  totalCombat: number;
+  completedCombat: number;
   openIssues: {
     id: string;
     type: string;
@@ -28,6 +31,12 @@ interface PartyDashboardProps {
 }
 
 export default function PartyDashboard({ parties }: PartyDashboardProps) {
+  const [, setLocation] = useLocation();
+
+  const handlePartyClick = (party: string) => {
+    console.log('Navigate to party detail:', party);
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {parties.map((party) => {
@@ -35,7 +44,12 @@ export default function PartyDashboard({ parties }: PartyDashboardProps) {
         const hasHighPriorityIssues = party.openIssues.some(i => i.priority === "High");
 
         return (
-          <Card key={party.party} data-testid={`card-party-${party.party}`}>
+          <Card 
+            key={party.party} 
+            className="hover-elevate cursor-pointer"
+            onClick={() => handlePartyClick(party.party)}
+            data-testid={`card-party-${party.party}`}
+          >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -53,17 +67,33 @@ export default function PartyDashboard({ parties }: PartyDashboardProps) {
               <Progress value={completionPercent} className="mt-2" />
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Encounter Progress</h4>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-chart-2" />
-                  <span className="text-muted-foreground">
-                    {party.completedEncounters} completed
-                  </span>
-                  <Circle className="h-4 w-4 text-muted-foreground ml-4" />
-                  <span className="text-muted-foreground">
-                    {party.totalEncounters - party.completedEncounters} remaining
-                  </span>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Encounter Progress</h4>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-chart-2" />
+                      <span className="text-muted-foreground">
+                        {party.completedEncounters} completed
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Circle className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {party.totalEncounters - party.completedEncounters} remaining
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Combat Encounters</h4>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Swords className="h-4 w-4 text-primary" />
+                    <span className="text-muted-foreground">
+                      {party.completedCombat}/{party.totalCombat} complete
+                    </span>
+                  </div>
                 </div>
               </div>
 

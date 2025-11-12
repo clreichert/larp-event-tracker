@@ -13,7 +13,8 @@ export default function IssuesPage() {
       priority: 'Low',
       status: 'Hopefully fixed',
       situation: 'Keeper tweaked an ankle while walking. Sounds minor, but should have a medical check-in at lunch. -Scaz. UPDATE: JulieL checked her out and she\'s fine.',
-      timestamp: new Date('2024-01-20T13:00:00')
+      timestamp: new Date('2024-01-20T13:00:00'),
+      hasDetails: true
     },
     {
       id: '2',
@@ -23,7 +24,8 @@ export default function IssuesPage() {
       priority: 'High',
       status: 'Monitoring',
       situation: 'Participant suddenly feeling light-headed, sweaty; Steve found Abigail. Julie Leviter checking in. Maisie\'s husband sent to hospital via 911.',
-      timestamp: new Date('2024-01-19T18:45:00')
+      timestamp: new Date('2024-01-19T18:45:00'),
+      hasDetails: true
     },
     {
       id: '3',
@@ -43,7 +45,8 @@ export default function IssuesPage() {
       priority: 'Low',
       status: 'Hopefully fixed',
       situation: 'Via companion, they are really into Banshee lore, Pendant of Fortune d\'Oro would be a big win for them. UPDATE: They got the pendant and were very excited!',
-      timestamp: new Date('2024-01-20T08:30:00')
+      timestamp: new Date('2024-01-20T08:30:00'),
+      hasDetails: true
     },
     {
       id: '5',
@@ -62,7 +65,7 @@ export default function IssuesPage() {
   };
 
   const handleEditIssue = (issue: Issue) => {
-    console.log("Edit issue:", issue);
+    console.log("Open issue detail page:", issue);
   };
 
   return (

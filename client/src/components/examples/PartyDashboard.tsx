@@ -6,6 +6,8 @@ export default function PartyDashboardExample() {
       party: 'Arden',
       totalEncounters: 12,
       completedEncounters: 8,
+      totalCombat: 3,
+      completedCombat: 2,
       openIssues: [],
       recentActivity: [
         { id: '1', description: 'Completed Kiko Truthspeaker encounter', timestamp: new Date() },
@@ -16,6 +18,8 @@ export default function PartyDashboardExample() {
       party: 'Clairia',
       totalEncounters: 10,
       completedEncounters: 5,
+      totalCombat: 2,
+      completedCombat: 1,
       openIssues: [
         {
           id: '1',
@@ -33,6 +37,8 @@ export default function PartyDashboardExample() {
       party: 'P\'Loa',
       totalEncounters: 11,
       completedEncounters: 3,
+      totalCombat: 1,
+      completedCombat: 0,
       openIssues: [
         {
           id: '2',

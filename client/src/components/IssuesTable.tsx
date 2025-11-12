@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Search } from "lucide-react";
+import { Edit, Search, FileText, ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ export interface Issue {
   status: "Monitoring" | "Fixing" | "Hopefully fixed";
   situation: string;
   timestamp: Date;
+  hasDetails?: boolean;
 }
 
 interface IssuesTableProps {
@@ -24,10 +25,24 @@ interface IssuesTableProps {
   onEdit?: (issue: Issue) => void;
 }
 
+type SortField = 'timestamp' | 'party' | 'job' | 'priority' | 'status' | 'type';
+type SortDirection = 'asc' | 'desc';
+
 export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterParty, setFilterParty] = useState<string>("all");
+  const [sortField, setSortField] = useState<SortField>('timestamp');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
 
   const filteredIssues = issues.filter(issue => {
     const matchesSearch = 
@@ -41,7 +56,45 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
     return matchesSearch && matchesStatus && matchesParty;
   });
 
+  const sortedIssues = [...filteredIssues].sort((a, b) => {
+    let comparison = 0;
+    
+    switch (sortField) {
+      case 'timestamp':
+        comparison = a.timestamp.getTime() - b.timestamp.getTime();
+        break;
+      case 'party':
+        comparison = a.party.localeCompare(b.party);
+        break;
+      case 'job':
+        comparison = a.job.localeCompare(b.job);
+        break;
+      case 'priority':
+        comparison = a.priority === 'High' ? -1 : 1;
+        break;
+      case 'status':
+        comparison = a.status.localeCompare(b.status);
+        break;
+      case 'type':
+        comparison = a.type.localeCompare(b.type);
+        break;
+    }
+    
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
+
   const parties = Array.from(new Set(issues.map(i => i.party))).sort();
+
+  const SortButton = ({ field, label }: { field: SortField; label: string }) => (
+    <button
+      onClick={() => handleSort(field)}
+      className="flex items-center gap-1 hover:text-foreground"
+      data-testid={`sort-${field}`}
+    >
+      {label}
+      <ArrowUpDown className="h-3 w-3" />
+    </button>
+  );
 
   return (
     <Card>
@@ -89,25 +142,25 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Time</TableHead>
-                <TableHead>Party</TableHead>
-                <TableHead>Job</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead><SortButton field="timestamp" label="Time" /></TableHead>
+                <TableHead><SortButton field="party" label="Party" /></TableHead>
+                <TableHead><SortButton field="job" label="Job" /></TableHead>
+                <TableHead><SortButton field="priority" label="Priority" /></TableHead>
+                <TableHead><SortButton field="status" label="Status" /></TableHead>
+                <TableHead><SortButton field="type" label="Type" /></TableHead>
                 <TableHead>Situation</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredIssues.length === 0 ? (
+              {sortedIssues.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     No issues found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredIssues.map((issue) => (
+                sortedIssues.map((issue) => (
                   <TableRow key={issue.id} className="hover-elevate" data-testid={`row-issue-${issue.id}`}>
                     <TableCell className="whitespace-nowrap text-sm">
                       {format(issue.timestamp, 'EEE h:mm a')}
@@ -133,7 +186,12 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-md">
-                      <p className="text-sm text-muted-foreground line-clamp-2">{issue.situation}</p>
+                      <div className="flex items-center gap-2">
+                        {issue.hasDetails && (
+                          <FileText className="h-4 w-4 text-primary shrink-0" data-testid={`icon-has-details-${issue.id}`} />
+                        )}
+                        <p className="text-sm text-muted-foreground line-clamp-2">{issue.situation}</p>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button

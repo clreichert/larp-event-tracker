@@ -1,13 +1,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
-import { Clock, MapPin, Package, Plus } from "lucide-react";
+import { CheckCircle2, Circle, Plus } from "lucide-react";
 
 export interface Encounter {
   id: string;
@@ -38,6 +36,10 @@ export default function PartyPathTracker({ party, encounters, onUpdateEncounter,
     }
   };
 
+  const handleEncounterClick = (encounter: Encounter) => {
+    console.log("Open encounter detail:", encounter);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -45,75 +47,73 @@ export default function PartyPathTracker({ party, encounters, onUpdateEncounter,
           <CardTitle>{party} - Party Path</CardTitle>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[600px] pr-4">
-            <div className="space-y-4">
-              {encounters.map((encounter, index) => (
-                <div key={encounter.id}>
-                  <div className="space-y-3 p-4 rounded-md border bg-card">
-                    <div className="flex items-start gap-3">
-                      <Checkbox
-                        id={`encounter-${encounter.id}`}
-                        checked={encounter.completed}
-                        onCheckedChange={(checked) => 
-                          onUpdateEncounter?.(encounter.id, { completed: checked as boolean })
-                        }
-                        className="mt-1"
-                        data-testid={`checkbox-encounter-${encounter.id}`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <Label
-                          htmlFor={`encounter-${encounter.id}`}
-                          className={`text-base font-semibold cursor-pointer ${
-                            encounter.completed ? 'line-through text-muted-foreground' : ''
-                          }`}
-                        >
-                          {encounter.name}
-                        </Label>
-                        
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {encounter.time && (
-                            <Badge variant="secondary" className="text-xs">
-                              <Clock className="h-3 w-3 mr-1" />
-                              {encounter.time}
-                            </Badge>
-                          )}
-                          {encounter.location && (
-                            <Badge variant="secondary" className="text-xs">
-                              <MapPin className="h-3 w-3 mr-1" />
-                              {encounter.location}
-                            </Badge>
-                          )}
-                          {encounter.item && (
-                            <Badge variant="default" className="text-xs">
-                              <Package className="h-3 w-3 mr-1" />
-                              {encounter.item}
-                            </Badge>
-                          )}
-                        </div>
-
-                        <p className="text-sm text-muted-foreground mt-2">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">Status</TableHead>
+                  <TableHead>Character</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Purpose</TableHead>
+                  <TableHead>Item</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {encounters.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      No encounters found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  encounters.map((encounter) => (
+                    <TableRow 
+                      key={encounter.id} 
+                      className="hover-elevate"
+                      data-testid={`row-encounter-${encounter.id}`}
+                    >
+                      <TableCell>
+                        {encounter.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-chart-2" data-testid={`status-complete-${encounter.id}`} />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" data-testid={`status-incomplete-${encounter.id}`} />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{encounter.name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {encounter.time || '—'}
+                      </TableCell>
+                      <TableCell className="max-w-md">
+                        <p className="text-sm text-muted-foreground line-clamp-2">
                           {encounter.activity}
                         </p>
-
-                        <div className="mt-3 space-y-2">
-                          <Label htmlFor={`notes-${encounter.id}`} className="text-xs">Staff Notes</Label>
-                          <Textarea
-                            id={`notes-${encounter.id}`}
-                            placeholder="Add notes about this encounter..."
-                            value={encounter.notes}
-                            onChange={(e) => onUpdateEncounter?.(encounter.id, { notes: e.target.value })}
-                            className="min-h-20 text-sm"
-                            data-testid={`textarea-notes-${encounter.id}`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {index < encounters.length - 1 && <Separator className="my-4" />}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                      </TableCell>
+                      <TableCell>
+                        {encounter.item ? (
+                          <Badge variant="default" className="text-xs">
+                            {encounter.item}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEncounterClick(encounter)}
+                          data-testid={`button-update-${encounter.id}`}
+                        >
+                          Update
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
