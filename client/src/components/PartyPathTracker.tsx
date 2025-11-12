@@ -74,11 +74,20 @@ export default function PartyPathTracker({ party, encounters, onUpdateEncounter,
                       data-testid={`row-encounter-${encounter.id}`}
                     >
                       <TableCell>
-                        {encounter.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-chart-2" data-testid={`status-complete-${encounter.id}`} />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground" data-testid={`status-incomplete-${encounter.id}`} />
-                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUpdateEncounter?.(encounter.id, { completed: !encounter.completed });
+                          }}
+                          className="hover-elevate active-elevate-2 p-1 rounded"
+                          data-testid={`button-toggle-status-${encounter.id}`}
+                        >
+                          {encounter.completed ? (
+                            <CheckCircle2 className="h-5 w-5 text-chart-2" data-testid={`status-complete-${encounter.id}`} />
+                          ) : (
+                            <Circle className="h-5 w-5 text-muted-foreground" data-testid={`status-incomplete-${encounter.id}`} />
+                          )}
+                        </button>
                       </TableCell>
                       <TableCell className="font-medium">{encounter.name}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">

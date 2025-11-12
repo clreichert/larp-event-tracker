@@ -1,15 +1,18 @@
 import { useRoute, useLocation } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, CheckCircle2, Circle, Swords } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowLeft, CheckCircle2, Circle, Swords, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import PartyPathTracker, { type Encounter } from "@/components/PartyPathTracker";
+import { useState } from "react";
 
 export default function PartyDetailPage() {
   const [, params] = useRoute("/party/:partyName");
   const [, setLocation] = useLocation();
   const partyName = params?.partyName || "";
+  const [issuesOpen, setIssuesOpen] = useState(true);
 
   // Mock data - would come from API in real implementation
   const partyData = {
@@ -18,6 +21,7 @@ export default function PartyDetailPage() {
       completedEncounters: 8,
       totalCombat: 3,
       completedCombat: 2,
+      openIssues: [],
       encounters: [
         {
           id: '1',
@@ -82,6 +86,15 @@ export default function PartyDetailPage() {
       completedEncounters: 5,
       totalCombat: 2,
       completedCombat: 1,
+      openIssues: [
+        {
+          id: '1',
+          type: 'Medical',
+          priority: 'Low' as const,
+          status: 'Monitoring',
+          situation: 'Traveler requested knee brace and wrap. Medical staff checking in at lunch.'
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -144,6 +157,15 @@ export default function PartyDetailPage() {
       completedEncounters: 3,
       totalCombat: 1,
       completedCombat: 0,
+      openIssues: [
+        {
+          id: '2',
+          type: 'Medical',
+          priority: 'High' as const,
+          status: 'Fixing',
+          situation: 'Participant feeling light-headed, being monitored by medical staff.'
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -188,6 +210,7 @@ export default function PartyDetailPage() {
       completedEncounters: 7,
       totalCombat: 2,
       completedCombat: 2,
+      openIssues: [],
       encounters: [
         {
           id: '1',
@@ -215,6 +238,15 @@ export default function PartyDetailPage() {
       completedEncounters: 4,
       totalCombat: 1,
       completedCombat: 1,
+      openIssues: [
+        {
+          id: '3',
+          type: 'Opportunity!',
+          priority: 'Low' as const,
+          status: 'Monitoring',
+          situation: 'Joyce serving as companion. Schedule is clear for ongoing support.'
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -232,6 +264,7 @@ export default function PartyDetailPage() {
       completedEncounters: 6,
       totalCombat: 3,
       completedCombat: 1,
+      openIssues: [],
       encounters: [
         {
           id: '1',
@@ -286,58 +319,108 @@ export default function PartyDetailPage() {
         <p className="text-muted-foreground">Party progress and encounter tracking</p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Overall Progress</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Encounters</span>
-                  <span className="font-medium">
-                    {data.completedEncounters}/{data.totalEncounters}
-                  </span>
-                </div>
-                <Progress value={completionPercent} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-sm font-semibold mb-2">Overall Progress</h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Encounters</span>
+                <span className="font-medium">
+                  {data.completedEncounters}/{data.totalEncounters}
+                </span>
+              </div>
+              <Progress value={completionPercent} />
+              <p className="text-xs text-muted-foreground">
+                {Math.round(completionPercent)}% complete
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-sm font-semibold mb-2">Combat Encounters</h3>
+            <div className="flex items-center gap-2">
+              <Swords className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-2xl font-semibold">
+                  {data.completedCombat}/{data.totalCombat}
+                </p>
+                <p className="text-xs text-muted-foreground">Complete</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <h3 className="text-sm font-semibold mb-2">Open Issues</h3>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              <div>
+                <p className="text-2xl font-semibold">
+                  {data.openIssues.length}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {Math.round(completionPercent)}% complete
+                  {data.openIssues.filter(i => i.priority === 'High').length > 0 
+                    ? `${data.openIssues.filter(i => i.priority === 'High').length} high priority`
+                    : 'Active'}
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
 
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Encounter Status</h3>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-chart-2" />
-                  <span className="text-muted-foreground">
-                    {data.completedEncounters} completed
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Circle className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {data.totalEncounters - data.completedEncounters} remaining
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Combat Encounters</h3>
-              <div className="flex items-center gap-2">
-                <Swords className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-2xl font-semibold">
-                    {data.completedCombat}/{data.totalCombat}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Complete</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {data.openIssues.length > 0 && (
+        <Collapsible open={issuesOpen} onOpenChange={setIssuesOpen}>
+          <Card>
+            <CardHeader>
+              <CollapsibleTrigger className="flex items-center justify-between w-full hover-elevate -m-6 p-6 rounded-lg" data-testid="trigger-toggle-issues">
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  Open Issues ({data.openIssues.length})
+                </CardTitle>
+                {issuesOpen ? (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                )}
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-3">
+                {data.openIssues.map((issue) => (
+                  <div
+                    key={issue.id}
+                    className="p-4 rounded-md bg-muted/30"
+                    data-testid={`issue-${issue.id}`}
+                  >
+                    <div className="flex items-start gap-2 mb-2">
+                      <Badge 
+                        variant={issue.priority === "High" ? "destructive" : "secondary"}
+                        className="text-xs"
+                      >
+                        {issue.priority}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {issue.type}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {issue.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {issue.situation}
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
 
       <PartyPathTracker 
         party={partyName}
