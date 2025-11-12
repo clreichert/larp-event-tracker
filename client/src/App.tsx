@@ -12,6 +12,7 @@ import Dashboard from "@/pages/Dashboard";
 import IssuesPage from "@/pages/IssuesPage";
 import PartyPathsPage from "@/pages/PartyPathsPage";
 import CombatPage from "@/pages/CombatPage";
+import PartyDetailPage from "@/pages/PartyDetailPage";
 import NotFound from "@/pages/not-found";
 
 function ThemeToggle() {
@@ -53,6 +54,7 @@ function Router() {
       <Route path="/issues" component={IssuesPage} />
       <Route path="/party-paths" component={PartyPathsPage} />
       <Route path="/combat" component={CombatPage} />
+      <Route path="/party/:partyName" component={PartyDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );

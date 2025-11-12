@@ -34,7 +34,7 @@ export default function PartyDashboard({ parties }: PartyDashboardProps) {
   const [, setLocation] = useLocation();
 
   const handlePartyClick = (party: string) => {
-    console.log('Navigate to party detail:', party);
+    setLocation(`/party/${party}`);
   };
 
   return (
