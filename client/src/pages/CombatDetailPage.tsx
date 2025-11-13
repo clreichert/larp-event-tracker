@@ -135,43 +135,38 @@ export default function CombatDetailPage() {
         <CardHeader>
           <CardTitle>Party Check-In</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {partyEncounters.map((partyEncounter) => (
             <div 
               key={partyEncounter.party}
-              className="p-4 rounded-lg border space-y-3"
+              className="p-4 rounded-lg border"
               data-testid={`party-checkin-${partyEncounter.party}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start gap-3">
                 <Checkbox
                   id={`party-${partyEncounter.party}`}
                   checked={partyEncounter.encountered}
                   onCheckedChange={() => handleToggleParty(partyEncounter.party)}
                   data-testid={`checkbox-party-${partyEncounter.party}`}
+                  className="mt-1"
                 />
-                <Label 
-                  htmlFor={`party-${partyEncounter.party}`}
-                  className="text-base font-semibold cursor-pointer"
-                >
-                  {partyEncounter.party}
-                </Label>
-              </div>
-              
-              {partyEncounter.encountered && (
-                <div className="ml-7 space-y-2">
-                  <Label htmlFor={`notes-${partyEncounter.party}`} className="text-sm">
-                    Notes (optional)
+                <div className="flex-1 space-y-2">
+                  <Label 
+                    htmlFor={`party-${partyEncounter.party}`}
+                    className="text-base font-semibold cursor-pointer"
+                  >
+                    {partyEncounter.party}
                   </Label>
                   <Textarea
                     id={`notes-${partyEncounter.party}`}
                     value={partyEncounter.notes}
                     onChange={(e) => handleNotesChange(partyEncounter.party, e.target.value)}
-                    placeholder="Add any notes about this encounter..."
-                    className="min-h-20"
+                    placeholder="Notes (optional)"
+                    className="min-h-16"
                     data-testid={`textarea-notes-${partyEncounter.party}`}
                   />
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </CardContent>

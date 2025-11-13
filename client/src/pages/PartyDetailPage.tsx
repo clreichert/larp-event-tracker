@@ -13,6 +13,8 @@ export default function PartyDetailPage() {
   const [, setLocation] = useLocation();
   const partyName = params?.partyName || "";
   const [issuesOpen, setIssuesOpen] = useState(true);
+  const [partyPathOpen, setPartyPathOpen] = useState(true);
+  const [combatOpen, setCombatOpen] = useState(true);
 
   // Mock data - would come from API in real implementation
   const partyData = {
@@ -392,7 +394,14 @@ export default function PartyDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card 
+          className="hover-elevate cursor-pointer"
+          onClick={() => {
+            setPartyPathOpen(true);
+            document.getElementById('party-path-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          data-testid="widget-overall-progress"
+        >
           <CardContent className="pt-6">
             <h3 className="text-sm font-semibold mb-2">Overall Progress</h3>
             <div className="space-y-2">
@@ -410,22 +419,38 @@ export default function PartyDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="hover-elevate cursor-pointer"
+          onClick={() => {
+            setCombatOpen(true);
+            document.getElementById('combat-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          data-testid="widget-combat-encounters"
+        >
           <CardContent className="pt-6">
             <h3 className="text-sm font-semibold mb-2">Combat Encounters</h3>
             <div className="flex items-center gap-2">
               <Swords className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-2xl font-semibold">
-                  {data.completedCombat}/{data.totalCombat}
+                  {data.completedCombat}
                 </p>
-                <p className="text-xs text-muted-foreground">Complete</p>
+                <p className="text-xs text-muted-foreground">
+                  {data.completedCombat === 1 ? 'encounter' : 'encounters'}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="hover-elevate cursor-pointer"
+          onClick={() => {
+            setIssuesOpen(true);
+            document.getElementById('issues-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          data-testid="widget-open-issues"
+        >
           <CardContent className="pt-6">
             <h3 className="text-sm font-semibold mb-2">Open Issues</h3>
             <div className="flex items-center gap-2">
@@ -447,7 +472,7 @@ export default function PartyDetailPage() {
 
       {data.openIssues.length > 0 && (
         <Collapsible open={issuesOpen} onOpenChange={setIssuesOpen}>
-          <Card>
+          <Card id="issues-section">
             <CardHeader>
               <CollapsibleTrigger className="flex items-center justify-between w-full hover-elevate -m-6 p-6 rounded-lg" data-testid="trigger-toggle-issues">
                 <CardTitle className="flex items-center gap-2">
@@ -494,50 +519,79 @@ export default function PartyDetailPage() {
         </Collapsible>
       )}
 
-      {data.combatEncounters && data.combatEncounters.length > 0 && (
-        <Card>
+      <Collapsible open={partyPathOpen} onOpenChange={setPartyPathOpen}>
+        <Card id="party-path-section">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Swords className="h-5 w-5" />
-              Combat Encounters ({data.combatEncounters.length})
-            </CardTitle>
+            <CollapsibleTrigger className="flex items-center justify-between w-full hover-elevate -m-6 p-6 rounded-lg" data-testid="trigger-toggle-party-path">
+              <CardTitle>{partyName} - Party Path</CardTitle>
+              {partyPathOpen ? (
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              )}
+            </CollapsibleTrigger>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {data.combatEncounters.map((combat) => (
-                <div
-                  key={combat.id}
-                  className="p-4 rounded-md border"
-                  data-testid={`combat-${combat.id}`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h4 className="font-semibold">{combat.name}</h4>
-                    <Badge variant="outline" className="text-xs">
-                      {combat.type}
-                    </Badge>
-                  </div>
-                  {combat.notes && (
-                    <p className="text-sm text-muted-foreground">
-                      {combat.notes}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
+          <CollapsibleContent>
+            <CardContent>
+              <PartyPathTracker 
+                party={partyName}
+                encounters={data.encounters}
+                onUpdateEncounter={(id, updates) => {
+                  console.log('Update encounter:', id, updates);
+                }}
+                onAddNote={(note) => {
+                  console.log('Add note:', note);
+                }}
+              />
+            </CardContent>
+          </CollapsibleContent>
         </Card>
-      )}
+      </Collapsible>
 
-      <PartyPathTracker 
-        party={partyName}
-        encounters={data.encounters}
-        onUpdateEncounter={(id, updates) => {
-          console.log('Update encounter:', id, updates);
-        }}
-        onAddNote={(note) => {
-          console.log('Add note:', note);
-        }}
-      />
+      {data.combatEncounters && data.combatEncounters.length > 0 && (
+        <Collapsible open={combatOpen} onOpenChange={setCombatOpen}>
+          <Card id="combat-section">
+            <CardHeader>
+              <CollapsibleTrigger className="flex items-center justify-between w-full hover-elevate -m-6 p-6 rounded-lg" data-testid="trigger-toggle-combat">
+                <CardTitle className="flex items-center gap-2">
+                  <Swords className="h-5 w-5" />
+                  Combat Encounters ({data.combatEncounters.length})
+                </CardTitle>
+                {combatOpen ? (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                )}
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent>
+                <div className="space-y-3">
+                  {data.combatEncounters.map((combat) => (
+                    <div
+                      key={combat.id}
+                      className="p-4 rounded-md border"
+                      data-testid={`combat-${combat.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h4 className="font-semibold">{combat.name}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {combat.type}
+                        </Badge>
+                      </div>
+                      {combat.notes && (
+                        <p className="text-sm text-muted-foreground">
+                          {combat.notes}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
     </div>
   );
 }
