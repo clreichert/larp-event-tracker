@@ -245,10 +245,16 @@ async function seed() {
   console.log(`Created ${issuesData.length} issues`);
 
   console.log("Seeding complete!");
-  process.exit(0);
 }
 
-seed().catch((error) => {
-  console.error("Error seeding database:", error);
-  process.exit(1);
-});
+export { seed };
+
+// Only run seed if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  seed()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error("Error seeding database:", error);
+      process.exit(1);
+    });
+}

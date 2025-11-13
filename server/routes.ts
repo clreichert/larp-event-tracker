@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { seed } from "./seed";
 import { 
   insertFeedbackSchema, 
   updateFeedbackSchema,
@@ -164,6 +165,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedIssue);
     } catch (error) {
       res.status(400).json({ error: "Invalid update data" });
+    }
+  });
+
+  app.post("/api/admin/seed", async (req, res) => {
+    try {
+      await seed();
+      res.json({ success: true, message: "Database seeded successfully" });
+    } catch (error) {
+      console.error("Seed error:", error);
+      res.status(500).json({ error: "Failed to seed database" });
     }
   });
 
