@@ -14,6 +14,7 @@ import PartyPathsPage from "@/pages/PartyPathsPage";
 import CombatPage from "@/pages/CombatPage";
 import CombatDetailPage from "@/pages/CombatDetailPage";
 import PartyDetailPage from "@/pages/PartyDetailPage";
+import ColorPreview from "@/pages/ColorPreview";
 import NotFound from "@/pages/not-found";
 
 function ThemeToggle() {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/combat" component={CombatPage} />
       <Route path="/combat/:combatId" component={CombatDetailPage} />
       <Route path="/party/:partyName" component={PartyDetailPage} />
+      <Route path="/colors" component={ColorPreview} />
       <Route component={NotFound} />
     </Switch>
   );
