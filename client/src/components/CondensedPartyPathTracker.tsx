@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CheckCircle2, Circle } from "lucide-react";
 
 export interface Encounter {
@@ -17,24 +17,33 @@ interface CondensedPartyPathTrackerProps {
 export default function CondensedPartyPathTracker({ encounters, onUpdateEncounter }: CondensedPartyPathTrackerProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     const initialValues: Record<string, string> = {};
     encounters.forEach(enc => {
-      initialValues[enc.id] = enc.notes || '';
+      if (!(enc.id in editValues)) {
+        initialValues[enc.id] = enc.notes || '';
+      }
     });
-    setEditValues(initialValues);
+    if (Object.keys(initialValues).length > 0) {
+      setEditValues(prev => ({ ...prev, ...initialValues }));
+    }
   }, [encounters]);
 
-  const handleNotesBlur = (encounterId: string) => {
+  const handleNotesSave = (encounterId: string) => {
     const newNotes = editValues[encounterId] || '';
     const encounter = encounters.find(e => e.id === encounterId);
     
-    if (encounter && newNotes !== encounter.notes) {
+    if (encounter && newNotes !== (encounter.notes || '')) {
       onUpdateEncounter?.(encounterId, { notes: newNotes });
     }
     
     setEditingId(null);
+  };
+
+  const handleNotesBlur = (encounterId: string) => {
+    handleNotesSave(encounterId);
   };
 
   const handleNotesChange = (encounterId: string, value: string) => {
@@ -44,13 +53,21 @@ export default function CondensedPartyPathTracker({ encounters, onUpdateEncounte
     }));
   };
 
+  const handleNotesKeyDown = (encounterId: string, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleNotesSave(encounterId);
+      inputRefs.current[encounterId]?.blur();
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-16">Status</TableHead>
-            <TableHead className="w-1/3">Character</TableHead>
+            <TableHead className="w-48">Character</TableHead>
             <TableHead>Comments</TableHead>
           </TableRow>
         </TableHeader>
@@ -68,7 +85,7 @@ export default function CondensedPartyPathTracker({ encounters, onUpdateEncounte
                 className="hover-elevate"
                 data-testid={`row-encounter-${encounter.id}`}
               >
-                <TableCell>
+                <TableCell className="w-16">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -84,14 +101,18 @@ export default function CondensedPartyPathTracker({ encounters, onUpdateEncounte
                     )}
                   </button>
                 </TableCell>
-                <TableCell className="font-medium">{encounter.name}</TableCell>
+                <TableCell className="font-medium w-48">{encounter.name}</TableCell>
                 <TableCell className="py-2">
                   <input
+                    ref={(el) => {
+                      inputRefs.current[encounter.id] = el;
+                    }}
                     type="text"
-                    value={editValues[encounter.id] || ''}
+                    value={editValues[encounter.id] ?? encounter.notes ?? ''}
                     onChange={(e) => handleNotesChange(encounter.id, e.target.value)}
                     onFocus={() => setEditingId(encounter.id)}
                     onBlur={() => handleNotesBlur(encounter.id)}
+                    onKeyDown={(e) => handleNotesKeyDown(encounter.id, e)}
                     placeholder="Add comments..."
                     className="w-full bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-sm"
                     data-testid={`input-comments-${encounter.id}`}
