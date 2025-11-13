@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertFeedbackSchema } from "@shared/schema";
+import { insertFeedbackSchema, updateFeedbackSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/feedback", async (req, res) => {
@@ -20,6 +20,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(newFeedback);
     } catch (error) {
       res.status(400).json({ error: "Invalid feedback data" });
+    }
+  });
+
+  app.patch("/api/feedback/:id", async (req, res) => {
+    try {
+      const validatedData = updateFeedbackSchema.parse(req.body);
+      const updatedFeedback = await storage.updateFeedback(req.params.id, validatedData);
+      if (!updatedFeedback) {
+        return res.status(404).json({ error: "Feedback not found" });
+      }
+      res.json(updatedFeedback);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid update data" });
     }
   });
 

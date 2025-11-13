@@ -22,13 +22,20 @@ export const feedback = pgTable("feedback", {
   name: text("name").notNull(),
   feature: text("feature").notNull(),
   comments: text("comments").notNull(),
+  status: text("status").notNull().default("New"),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
 export const insertFeedbackSchema = createInsertSchema(feedback).omit({
   id: true,
   timestamp: true,
+  status: true,
+});
+
+export const updateFeedbackSchema = z.object({
+  status: z.enum(["New", "Reviewed", "Accepted", "Rejected"]),
 });
 
 export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type UpdateFeedback = z.infer<typeof updateFeedbackSchema>;
 export type Feedback = typeof feedback.$inferSelect;

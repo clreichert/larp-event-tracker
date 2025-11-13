@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Feedback, type InsertFeedback } from "@shared/schema";
+import { type User, type InsertUser, type Feedback, type InsertFeedback, type UpdateFeedback } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 // modify the interface with any CRUD methods
@@ -10,6 +10,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getAllFeedback(): Promise<Feedback[]>;
   createFeedback(feedback: InsertFeedback): Promise<Feedback>;
+  updateFeedback(id: string, updates: UpdateFeedback): Promise<Feedback | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -49,10 +50,21 @@ export class MemStorage implements IStorage {
     const newFeedback: Feedback = { 
       ...insertFeedback, 
       id,
+      status: "New",
       timestamp: new Date()
     };
     this.feedback.set(id, newFeedback);
     return newFeedback;
+  }
+
+  async updateFeedback(id: string, updates: UpdateFeedback): Promise<Feedback | undefined> {
+    const existing = this.feedback.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    const updated: Feedback = { ...existing, ...updates };
+    this.feedback.set(id, updated);
+    return updated;
   }
 }
 
