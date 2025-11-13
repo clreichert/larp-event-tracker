@@ -99,7 +99,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getEncountersByParty(partyId: string): Promise<Encounter[]> {
-    return await db.select().from(encounters).where(eq(encounters.partyId, partyId));
+    return await db.select().from(encounters).where(eq(encounters.partyId, partyId)).orderBy(encounters.id);
   }
 
   async createEncounter(encounter: InsertEncounter): Promise<Encounter> {
