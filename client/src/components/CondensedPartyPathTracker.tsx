@@ -17,7 +17,7 @@ interface CondensedPartyPathTrackerProps {
 export default function CondensedPartyPathTracker({ encounters, onUpdateEncounter }: CondensedPartyPathTrackerProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
-  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const textareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
   useEffect(() => {
     const initialValues: Record<string, string> = {};
@@ -51,15 +51,33 @@ export default function CondensedPartyPathTracker({ encounters, onUpdateEncounte
       ...prev,
       [encounterId]: value
     }));
-  };
-
-  const handleNotesKeyDown = (encounterId: string, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleNotesSave(encounterId);
-      inputRefs.current[encounterId]?.blur();
+    
+    // Auto-resize textarea
+    const textarea = textareaRefs.current[encounterId];
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
     }
   };
+
+  const handleNotesKeyDown = (encounterId: string, e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleNotesSave(encounterId);
+      textareaRefs.current[encounterId]?.blur();
+    }
+  };
+
+  useEffect(() => {
+    // Auto-resize all textareas on mount and when encounters change
+    encounters.forEach(encounter => {
+      const textarea = textareaRefs.current[encounter.id];
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+    });
+  }, [encounters, editValues]);
 
   return (
     <div className="rounded-md border">
@@ -103,18 +121,18 @@ export default function CondensedPartyPathTracker({ encounters, onUpdateEncounte
                 </TableCell>
                 <TableCell className="font-medium w-48">{encounter.name}</TableCell>
                 <TableCell className="py-2">
-                  <input
+                  <textarea
                     ref={(el) => {
-                      inputRefs.current[encounter.id] = el;
+                      textareaRefs.current[encounter.id] = el;
                     }}
-                    type="text"
                     value={editValues[encounter.id] ?? encounter.notes ?? ''}
                     onChange={(e) => handleNotesChange(encounter.id, e.target.value)}
                     onFocus={() => setEditingId(encounter.id)}
                     onBlur={() => handleNotesBlur(encounter.id)}
                     onKeyDown={(e) => handleNotesKeyDown(encounter.id, e)}
                     placeholder="Add comments..."
-                    className="w-full bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-sm"
+                    className="w-full bg-transparent border-0 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-sm resize-none overflow-hidden min-h-[2rem]"
+                    rows={1}
                     data-testid={`input-comments-${encounter.id}`}
                   />
                 </TableCell>
