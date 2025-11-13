@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, AlertCircle, Map, Swords, Users, Palette, MessageSquare } from "lucide-react";
+import { LayoutDashboard, AlertCircle, Map, Swords, Users, Palette, MessageSquare, FileText } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface AppSidebarProps {
@@ -47,6 +47,11 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
   ];
 
   const designItems = [
+    {
+      title: "Party Prototype",
+      url: "/design/prototype",
+      icon: FileText,
+    },
     {
       title: "Colors",
       url: "/colors",
