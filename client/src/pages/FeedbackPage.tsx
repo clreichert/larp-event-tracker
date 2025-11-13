@@ -17,6 +17,7 @@ export default function FeedbackPage() {
   const [, setLocation] = useLocation();
   const [sortField, setSortField] = useState<SortField>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [userInteracted, setUserInteracted] = useState(false);
   
   const { data: feedbackItems = [], isLoading } = useQuery<Feedback[]>({
     queryKey: ["/api/feedback"],
@@ -33,12 +34,18 @@ export default function FeedbackPage() {
   });
 
   const handleSort = (field: SortField) => {
+    if (!userInteracted && field === 'timestamp') {
+      setUserInteracted(true);
+      return;
+    }
+    
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection(field === 'timestamp' ? 'desc' : 'asc');
     }
+    setUserInteracted(true);
   };
 
   const sortedFeedback = [...feedbackItems].sort((a, b) => {
@@ -102,7 +109,7 @@ export default function FeedbackPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-32"><SortButton field="name" label="Name" /></TableHead>
-                    <TableHead className="w-44">Date</TableHead>
+                    <TableHead className="w-44"><SortButton field="timestamp" label="Date" /></TableHead>
                     <TableHead className="w-40"><SortButton field="feature" label="Feature" /></TableHead>
                     <TableHead className="w-40"><SortButton field="status" label="Status" /></TableHead>
                     <TableHead>Comments</TableHead>
