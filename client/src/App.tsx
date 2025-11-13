@@ -18,6 +18,7 @@ import PartyDetailPage from "@/pages/PartyDetailPage";
 import ColorPreview from "@/pages/ColorPreview";
 import FeedbackPage from "@/pages/FeedbackPage";
 import FeedbackDetailPage from "@/pages/FeedbackDetailPage";
+import AdminSeedPage from "@/pages/AdminSeedPage";
 import NotFound from "@/pages/not-found";
 
 function ThemeToggle() {
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/colors" component={ColorPreview} />
       <Route path="/feedback" component={FeedbackPage} />
       <Route path="/feedback/new" component={FeedbackDetailPage} />
+      <Route path="/admin/seed" component={AdminSeedPage} />
       <Route component={NotFound} />
     </Switch>
   );
