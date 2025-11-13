@@ -43,11 +43,12 @@ export interface IStorage {
   getAllIssues(): Promise<Issue[]>;
   createIssue(issue: InsertIssue): Promise<Issue>;
   updateIssue(id: string, updates: UpdateIssue): Promise<Issue | undefined>;
+  clearAllData(): Promise<void>;
 }
 
 import { db } from "./db";
 import { users, feedback, parties, encounters, combatEncounters, combatCheckins, issues } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
@@ -150,6 +151,12 @@ export class DatabaseStorage implements IStorage {
   async updateIssue(id: string, updates: UpdateIssue): Promise<Issue | undefined> {
     const result = await db.update(issues).set(updates).where(eq(issues.id, id)).returning();
     return result[0];
+  }
+
+  async clearAllData(): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`TRUNCATE TABLE combat_checkins, combat_encounters, encounters, feedback, issues, parties RESTART IDENTITY`);
+    });
   }
 }
 

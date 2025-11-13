@@ -3,6 +3,29 @@
 ## Project Overview
 A full-stack event management application for tracking LARP (Live Action Role Play) events with real-time party progress, issue tracking, and combat encounters.
 
+## Admin Database Seeding
+
+**Purpose**: Populate production database with sample event data
+
+**Access**: `/admin/seed` route
+
+**Security**: Protected by TWO required environment variables
+- `ALLOW_ADMIN_SEEDING=true` - Enables the seeding endpoint
+- `ADMIN_SEED_SECRET=your-random-secret` - Secret key that must be entered in the UI
+- Both are required for the endpoint to work
+- **Important**: Remove both environment variables after seeding for security
+- Consider removing the `/admin/seed` route entirely after initial setup
+
+**Usage**:
+1. Set environment variables:
+   - `ALLOW_ADMIN_SEEDING=true`
+   - `ADMIN_SEED_SECRET=your-random-secret` (generate a strong random value)
+2. Navigate to `/admin/seed` in your published app
+3. Enter the same secret value you set in ADMIN_SEED_SECRET
+4. Check "Clear all existing data before seeding" (recommended)
+5. Click "Seed Database Now"
+6. Immediately remove BOTH `ALLOW_ADMIN_SEEDING` and `ADMIN_SEED_SECRET` environment variables
+
 ## Current Features
 
 ### 1. Admin Dashboard

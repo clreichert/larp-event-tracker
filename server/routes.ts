@@ -169,7 +169,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/admin/seed", async (req, res) => {
+    const allowSeeding = process.env.ALLOW_ADMIN_SEEDING === "true";
+    const adminSecret = process.env.ADMIN_SEED_SECRET;
+    
+    if (!allowSeeding) {
+      return res.status(403).json({ 
+        error: "Admin seeding is disabled. Set ALLOW_ADMIN_SEEDING=true environment variable to enable." 
+      });
+    }
+
+    if (!adminSecret) {
+      return res.status(500).json({
+        error: "Admin seed secret not configured. Set ADMIN_SEED_SECRET environment variable."
+      });
+    }
+
+    const { clearFirst = true, secret } = req.body;
+
+    if (secret !== adminSecret) {
+      return res.status(403).json({
+        error: "Invalid admin secret."
+      });
+    }
+
     try {
+      
+      if (clearFirst) {
+        await storage.clearAllData();
+      }
+      
       await seed();
       res.json({ success: true, message: "Database seeded successfully" });
     } catch (error) {
