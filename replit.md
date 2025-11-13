@@ -82,9 +82,9 @@ Creatures, Humanoid, Elemental, Magical, Undead
 
 ## Technical Stack
 - **Frontend**: React, Wouter (routing), TanStack Query, Shadcn UI
-- **Backend**: Express.js
-- **Database**: PostgreSQL (when implemented)
-- **Current Data**: Mock data in components
+- **Backend**: Express.js with comprehensive API routes
+- **Database**: PostgreSQL (Neon) with Drizzle ORM
+- **Data Persistence**: All data persisted in database (parties, encounters, combat, issues, feedback)
 
 ## Pages & Routes
 - `/` - Admin Dashboard
@@ -98,9 +98,32 @@ Creatures, Humanoid, Elemental, Magical, Undead
 - **Admin**: Full access to all features (dashboard, issues, party detail)
 - **Staff**: Access to party paths and combat tracker (not yet implemented)
 
+## Database Schema
+- **Parties**: All 11 parties with unique names
+- **Encounters**: Party path encounters linked to parties
+- **Combat Encounters**: Roaming combat encounters
+- **Combat Checkins**: Track which parties encountered which combat
+- **Issues**: Issue tracking with timestamps and priority
+- **Feedback**: User feedback system with status tracking
+
+## API Routes
+- `GET/POST /api/feedback` - Feedback management
+- `PATCH /api/feedback/:id` - Update feedback status
+- `GET /api/parties` - All parties
+- `GET /api/parties/:name` - Party by name
+- `GET /api/encounters` - All encounters
+- `GET /api/encounters/party/:partyId` - Encounters by party
+- `PATCH /api/encounters/:id` - Update encounter status/notes
+- `GET /api/combat-encounters` - All combat encounters
+- `GET /api/combat-checkins` - All combat checkins
+- `GET /api/combat-checkins/:combatId` - Checkins by combat
+- `PATCH /api/combat-checkins/:id` - Update checkin status/notes
+- `GET/POST /api/issues` - Issues management
+- `PATCH /api/issues/:id` - Update issue
+
 ## Notes
-- Currently using mock data throughout
 - Combat encounters are roaming/independent from party path schedules
 - Party path encounters are pre-scheduled in handbook
+- Database seeded with sample event data for 11 parties
 - Issue detail page with chronological ledger still needs implementation
 - Encounter detail page still needs implementation

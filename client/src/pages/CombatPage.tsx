@@ -2,75 +2,76 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
 import { Swords } from "lucide-react";
-
-interface CombatEncounter {
-  id: string;
-  name: string;
-  type: string;
-  partiesEncountered: number;
-  totalParties: number;
-}
+import { useQuery } from "@tanstack/react-query";
+import type { CombatEncounter, CombatCheckin, Party } from "@shared/schema";
+import { useMemo } from "react";
 
 export default function CombatPage() {
   const [, setLocation] = useLocation();
 
-  const combatEncounters: CombatEncounter[] = [
-    {
-      id: '1',
-      name: 'Shadow Beast Pack',
-      type: 'Creatures',
-      partiesEncountered: 3,
-      totalParties: 6
-    },
-    {
-      id: '2',
-      name: 'Bandit Ambush',
-      type: 'Humanoid',
-      partiesEncountered: 5,
-      totalParties: 6
-    },
-    {
-      id: '3',
-      name: 'River Guardian',
-      type: 'Elemental',
-      partiesEncountered: 2,
-      totalParties: 6
-    },
-    {
-      id: '4',
-      name: 'Night Creatures',
-      type: 'Creatures',
-      partiesEncountered: 1,
-      totalParties: 6
-    },
-    {
-      id: '5',
-      name: 'Forest Spirits',
-      type: 'Magical',
-      partiesEncountered: 4,
-      totalParties: 6
-    },
-    {
-      id: '6',
-      name: 'Mountain Trolls',
-      type: 'Creatures',
-      partiesEncountered: 0,
-      totalParties: 6
-    },
-    {
-      id: '7',
-      name: 'Desert Wraiths',
-      type: 'Undead',
-      partiesEncountered: 2,
-      totalParties: 6
-    }
-  ];
+  const { data: combatEncounters, isLoading: combatLoading } = useQuery<CombatEncounter[]>({
+    queryKey: ['/api/combat-encounters'],
+  });
+
+  const { data: combatCheckins, isLoading: checkinsLoading } = useQuery<CombatCheckin[]>({
+    queryKey: ['/api/combat-checkins'],
+  });
+
+  const { data: parties, isLoading: partiesLoading } = useQuery<Party[]>({
+    queryKey: ['/api/parties'],
+  });
+
+  const isLoading = combatLoading || checkinsLoading || partiesLoading;
+
+  const combatWithCounts = useMemo(() => {
+    if (!combatEncounters || !combatCheckins || !parties) return [];
+
+    return combatEncounters.map(combat => {
+      const encountered = combatCheckins.filter(
+        c => c.combatId === combat.id && c.encountered
+      ).length;
+
+      return {
+        ...combat,
+        partiesEncountered: encountered,
+        totalParties: parties.length,
+      };
+    });
+  }, [combatEncounters, combatCheckins, parties]);
 
   const handleEncounterClick = (encounterId: string) => {
     setLocation(`/combat/${encounterId}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-semibold" data-testid="heading-combat">Combat Tracker</h1>
+          <p className="text-muted-foreground">Track roaming combat encounters across all parties</p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Swords className="h-5 w-5" />
+              Combat Encounters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -98,7 +99,7 @@ export default function CombatPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {combatEncounters.map((encounter) => (
+                {combatWithCounts.map((encounter) => (
                   <TableRow 
                     key={encounter.id} 
                     className="hover-elevate"

@@ -1,67 +1,27 @@
-import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import IssueLogger from "@/components/IssueLogger";
 import IssuesTable, { type Issue } from "@/components/IssuesTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function IssuesPage() {
-  const [issues, setIssues] = useState<Issue[]>([
-    {
-      id: '1',
-      party: 'Clairia',
-      job: 'Keeper',
-      type: 'Medical',
-      priority: 'Low',
-      status: 'Hopefully fixed',
-      situation: 'Keeper tweaked an ankle while walking. Sounds minor, but should have a medical check-in at lunch. -Scaz. UPDATE: JulieL checked her out and she\'s fine.',
-      timestamp: new Date('2024-01-20T13:00:00'),
-      hasDetails: true
+  const { data: issues = [], isLoading } = useQuery<Issue[]>({
+    queryKey: ["/api/issues"],
+  });
+
+  const createIssueMutation = useMutation({
+    mutationFn: async (newIssue: Omit<Issue, "id" | "timestamp">) => {
+      const response = await apiRequest("POST", "/api/issues", newIssue);
+      return response.json();
     },
-    {
-      id: '2',
-      party: 'P\'Loa',
-      job: 'Other',
-      type: 'Medical',
-      priority: 'High',
-      status: 'Monitoring',
-      situation: 'Participant suddenly feeling light-headed, sweaty; Steve found Abigail. Julie Leviter checking in. Maisie\'s husband sent to hospital via 911.',
-      timestamp: new Date('2024-01-19T18:45:00'),
-      hasDetails: true
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/issues"] });
     },
-    {
-      id: '3',
-      party: 'Uri-Kesh',
-      job: 'Traveler',
-      type: 'General',
-      priority: 'Low',
-      status: 'Hopefully fixed',
-      situation: 'Participant walked through basement with eyes closed, feeling overwhelmed. Talked to Bill, participant went straight into combat workshops. Bill not concerned. -jodi',
-      timestamp: new Date('2024-01-19T18:30:00')
-    },
-    {
-      id: '4',
-      party: 'Noctara',
-      job: 'Other',
-      type: 'Opportunity!',
-      priority: 'Low',
-      status: 'Hopefully fixed',
-      situation: 'Via companion, they are really into Banshee lore, Pendant of Fortune d\'Oro would be a big win for them. UPDATE: They got the pendant and were very excited!',
-      timestamp: new Date('2024-01-20T08:30:00'),
-      hasDetails: true
-    },
-    {
-      id: '5',
-      party: 'Keer',
-      job: 'Ranger',
-      type: 'General',
-      priority: 'Low',
-      status: 'Monitoring',
-      situation: 'BobM reports that Nietz (Martin) is holding himself apart. Worth keeping an eye on. Note: he lost a son to overdose couple years back, watch as grief/Rites plot ramps up. -Kristi',
-      timestamp: new Date('2024-01-20T09:00:00')
-    }
-  ]);
+  });
 
   const handleLogIssue = (newIssue: Issue) => {
-    setIssues(prev => [newIssue, ...prev]);
+    const { id, timestamp, ...issueData } = newIssue;
+    createIssueMutation.mutate(issueData);
   };
 
   const handleEditIssue = (issue: Issue) => {

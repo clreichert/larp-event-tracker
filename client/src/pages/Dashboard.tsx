@@ -1,103 +1,57 @@
 import PartyDashboard from "@/components/PartyDashboard";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { Party, Issue, Encounter, CombatCheckin } from "@shared/schema";
+import { useMemo } from "react";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   
-  const mockParties = [
-    {
-      party: 'Arden',
-      totalEncounters: 12,
-      completedEncounters: 8,
-      totalCombat: 3,
-      completedCombat: 2,
-      openIssues: [],
-      recentActivity: [
-        { id: '1', description: 'Completed Kiko Truthspeaker encounter', timestamp: new Date() },
-        { id: '2', description: 'Received locus root item', timestamp: new Date() }
-      ]
-    },
-    {
-      party: 'Clairia',
-      totalEncounters: 10,
-      completedEncounters: 5,
-      totalCombat: 2,
-      completedCombat: 1,
-      openIssues: [
-        {
-          id: '1',
-          type: 'Medical',
-          priority: 'Low' as const,
-          status: 'Monitoring',
-          situation: 'Traveler requested knee brace and wrap. Medical staff checking in at lunch.'
-        }
-      ],
-      recentActivity: [
-        { id: '1', description: 'Party split for rest', timestamp: new Date() }
-      ]
-    },
-    {
-      party: 'P\'Loa',
-      totalEncounters: 11,
-      completedEncounters: 3,
-      totalCombat: 1,
-      completedCombat: 0,
-      openIssues: [
-        {
-          id: '2',
-          type: 'Medical',
-          priority: 'High' as const,
-          status: 'Fixing',
-          situation: 'Participant feeling light-headed, being monitored by medical staff.'
-        }
-      ],
-      recentActivity: []
-    },
-    {
-      party: 'Uri-Kesh',
-      totalEncounters: 10,
-      completedEncounters: 7,
-      totalCombat: 2,
-      completedCombat: 2,
-      openIssues: [],
-      recentActivity: [
-        { id: '1', description: 'Completed evening encounters', timestamp: new Date() }
-      ]
-    },
-    {
-      party: 'Doloron',
-      totalEncounters: 9,
-      completedEncounters: 4,
-      totalCombat: 1,
-      completedCombat: 1,
-      openIssues: [
-        {
-          id: '3',
-          type: 'Opportunity!',
-          priority: 'Low' as const,
-          status: 'Monitoring',
-          situation: 'Joyce serving as companion. Schedule is clear for ongoing support.'
-        }
-      ],
-      recentActivity: []
-    },
-    {
-      party: 'Sythwan',
-      totalEncounters: 11,
-      completedEncounters: 6,
-      totalCombat: 3,
-      completedCombat: 1,
-      openIssues: [],
-      recentActivity: [
-        { id: '1', description: 'Requested early soulspeaking', timestamp: new Date() }
-      ]
-    }
-  ];
+  const { data: parties, isLoading: partiesLoading } = useQuery<Party[]>({
+    queryKey: ['/api/parties'],
+  });
 
-  const totalIssues = mockParties.reduce((sum, p) => sum + p.openIssues.length, 0);
-  const highPriorityIssues = mockParties.reduce((sum, p) => 
+  const { data: issues, isLoading: issuesLoading } = useQuery<Issue[]>({
+    queryKey: ['/api/issues'],
+  });
+
+  const { data: encounters, isLoading: encountersLoading } = useQuery<Encounter[]>({
+    queryKey: ['/api/encounters'],
+  });
+
+  const { data: combatCheckins, isLoading: combatCheckinsLoading } = useQuery<CombatCheckin[]>({
+    queryKey: ['/api/combat-checkins'],
+  });
+
+  const isLoading = partiesLoading || issuesLoading || encountersLoading || combatCheckinsLoading;
+
+  const dashboardData = useMemo(() => {
+    if (!parties || !issues || !encounters || !combatCheckins) {
+      return [];
+    }
+
+    return parties.map(party => {
+      const partyEncounters = encounters.filter(e => e.partyId === party.id);
+      const partyIssues = issues.filter(i => i.party === party.name && i.status !== 'Resolved');
+      const partyCombatCheckins = combatCheckins.filter(c => c.partyId === party.id);
+
+      return {
+        party: party.name,
+        totalEncounters: partyEncounters.length,
+        completedEncounters: partyEncounters.filter(e => e.completed).length,
+        totalCombat: partyCombatCheckins.length,
+        completedCombat: partyCombatCheckins.filter(c => c.encountered).length,
+        openIssues: partyIssues,
+        recentActivity: []
+      };
+    });
+  }, [parties, issues, encounters, combatCheckins]);
+
+  const totalIssues = dashboardData.reduce((sum, p) => sum + p.openIssues.length, 0);
+  const highPriorityIssues = dashboardData.reduce((sum, p) => 
     sum + p.openIssues.filter(i => i.priority === 'High').length, 0
   );
 
@@ -108,30 +62,51 @@ export default function Dashboard() {
         <p className="text-muted-foreground">Overview of all party progress and issues</p>
       </div>
 
-      <Card 
-        className="p-6 hover-elevate cursor-pointer max-w-sm"
-        onClick={() => setLocation('/issues')}
-        data-testid="widget-open-issues"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Open Issues</p>
-            <p className="text-4xl font-semibold mt-2" data-testid="metric-open-issues">
-              {totalIssues}
-            </p>
-            {highPriorityIssues > 0 && (
-              <p className="text-sm text-destructive mt-1">
-                {highPriorityIssues} high priority
-              </p>
-            )}
+      {isLoading ? (
+        <>
+          <Card className="p-6 max-w-sm">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-16" />
+              </div>
+              <Skeleton className="h-12 w-12 rounded-md" />
+            </div>
+          </Card>
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
           </div>
-          <div className="h-12 w-12 rounded-md bg-destructive/10 flex items-center justify-center">
-            <AlertCircle className="h-6 w-6 text-destructive" />
-          </div>
-        </div>
-      </Card>
+        </>
+      ) : (
+        <>
+          <Card 
+            className="p-6 hover-elevate cursor-pointer max-w-sm"
+            onClick={() => setLocation('/issues')}
+            data-testid="widget-open-issues"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Open Issues</p>
+                <p className="text-4xl font-semibold mt-2" data-testid="metric-open-issues">
+                  {totalIssues}
+                </p>
+                {highPriorityIssues > 0 && (
+                  <p className="text-sm text-destructive mt-1">
+                    {highPriorityIssues} high priority
+                  </p>
+                )}
+              </div>
+              <div className="h-12 w-12 rounded-md bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-destructive" />
+              </div>
+            </div>
+          </Card>
 
-      <PartyDashboard parties={mockParties} />
+          <PartyDashboard parties={dashboardData} />
+        </>
+      )}
     </div>
   );
 }
