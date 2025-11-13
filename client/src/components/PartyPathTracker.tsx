@@ -10,12 +10,12 @@ import { CheckCircle2, Circle, Plus } from "lucide-react";
 export interface Encounter {
   id: string;
   name: string;
-  time?: string;
-  location?: string;
-  activity: string;
-  item?: string;
+  time?: string | null;
+  location?: string | null;
+  activity: string | null;
+  item?: string | null;
   completed: boolean;
-  notes: string;
+  notes: string | null;
 }
 
 interface PartyPathTrackerProps {
