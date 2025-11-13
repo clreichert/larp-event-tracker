@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ArrowLeft, CheckCircle2, Circle, Swords, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import PartyPathTracker, { type Encounter } from "@/components/PartyPathTracker";
 import { useState } from "react";
+import { getPartyColor } from "@/lib/partyColors";
 
 export default function PartyDetailPage() {
   const [, params] = useRoute("/party/:partyName");
@@ -372,6 +373,7 @@ export default function PartyDetailPage() {
   }
 
   const completionPercent = (data.completedEncounters / data.totalEncounters) * 100;
+  const colors = getPartyColor(partyName);
 
   return (
     <div className="space-y-6">
@@ -387,7 +389,7 @@ export default function PartyDetailPage() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-semibold" data-testid={`heading-party-${partyName}`}>
+        <h1 className={`text-3xl font-semibold ${colors.text}`} data-testid={`heading-party-${partyName}`}>
           {partyName}
         </h1>
         <p className="text-muted-foreground">Party progress and encounter tracking</p>

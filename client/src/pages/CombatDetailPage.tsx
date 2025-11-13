@@ -7,8 +7,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Swords } from "lucide-react";
+import { getPartyColor } from "@/lib/partyColors";
 
-const PARTIES = ["Arden", "Clairia", "P'Loa", "Uri-Kesh", "Doloron", "Sythwan"];
+const PARTIES = ["Arden", "Clairia", "P'Loa", "Uri-Kesh", "Doloron", "Sythwan", "Noctara", "Keer", "Waylon", "Elsewhich", "Glendeep"];
 
 interface PartyEncounter {
   party: string;
@@ -136,39 +137,42 @@ export default function CombatDetailPage() {
           <CardTitle>Party Check-In</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {partyEncounters.map((partyEncounter) => (
-            <div 
-              key={partyEncounter.party}
-              className="p-4 rounded-lg border"
-              data-testid={`party-checkin-${partyEncounter.party}`}
-            >
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id={`party-${partyEncounter.party}`}
-                  checked={partyEncounter.encountered}
-                  onCheckedChange={() => handleToggleParty(partyEncounter.party)}
-                  data-testid={`checkbox-party-${partyEncounter.party}`}
-                  className="mt-1"
-                />
-                <div className="flex-1 space-y-2">
-                  <Label 
-                    htmlFor={`party-${partyEncounter.party}`}
-                    className="text-base font-semibold cursor-pointer"
-                  >
-                    {partyEncounter.party}
-                  </Label>
-                  <Textarea
-                    id={`notes-${partyEncounter.party}`}
-                    value={partyEncounter.notes}
-                    onChange={(e) => handleNotesChange(partyEncounter.party, e.target.value)}
-                    placeholder="Notes (optional)"
-                    className="min-h-16"
-                    data-testid={`textarea-notes-${partyEncounter.party}`}
+          {partyEncounters.map((partyEncounter) => {
+            const colors = getPartyColor(partyEncounter.party);
+            return (
+              <div 
+                key={partyEncounter.party}
+                className={`p-4 rounded-lg border border-l-4 ${colors.border}`}
+                data-testid={`party-checkin-${partyEncounter.party}`}
+              >
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id={`party-${partyEncounter.party}`}
+                    checked={partyEncounter.encountered}
+                    onCheckedChange={() => handleToggleParty(partyEncounter.party)}
+                    data-testid={`checkbox-party-${partyEncounter.party}`}
+                    className="mt-1"
                   />
+                  <div className="flex-1 space-y-2">
+                    <Label 
+                      htmlFor={`party-${partyEncounter.party}`}
+                      className={`text-base font-semibold cursor-pointer ${colors.text}`}
+                    >
+                      {partyEncounter.party}
+                    </Label>
+                    <Textarea
+                      id={`notes-${partyEncounter.party}`}
+                      value={partyEncounter.notes}
+                      onChange={(e) => handleNotesChange(partyEncounter.party, e.target.value)}
+                      placeholder="Notes (optional)"
+                      className="min-h-16"
+                      data-testid={`textarea-notes-${partyEncounter.party}`}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 

@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, Circle, AlertCircle, Swords } from "lucide-react";
 import { useLocation } from "wouter";
+import { getPartyColor } from "@/lib/partyColors";
 
 interface PartyStatus {
   party: string;
@@ -42,17 +43,18 @@ export default function PartyDashboard({ parties }: PartyDashboardProps) {
       {parties.map((party) => {
         const completionPercent = (party.completedEncounters / party.totalEncounters) * 100;
         const hasHighPriorityIssues = party.openIssues.some(i => i.priority === "High");
+        const colors = getPartyColor(party.party);
 
         return (
           <Card 
             key={party.party} 
-            className="hover-elevate cursor-pointer"
+            className={`hover-elevate cursor-pointer border-l-4 ${colors.border}`}
             onClick={() => handlePartyClick(party.party)}
             data-testid={`card-party-${party.party}`}
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className={`flex items-center gap-2 ${colors.text}`}>
                   {party.party}
                   {hasHighPriorityIssues && (
                     <Badge variant="destructive" className="text-xs">

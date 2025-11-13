@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, AlertCircle, Map, Swords, Users } from "lucide-react";
+import { LayoutDashboard, AlertCircle, Map, Swords, Users, Palette } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface AppSidebarProps {
@@ -43,6 +43,14 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
       title: "Combat Tracker",
       url: "/combat",
       icon: Swords,
+    },
+  ];
+
+  const designItems = [
+    {
+      title: "Colors",
+      url: "/colors",
+      icon: Palette,
     },
   ];
 
@@ -90,6 +98,31 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {staffItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location === item.url}
+                    data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    <a href={item.url} onClick={(e) => {
+                      e.preventDefault();
+                      setLocation(item.url);
+                    }}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Design</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {designItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
