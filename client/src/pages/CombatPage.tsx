@@ -1,94 +1,135 @@
-import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import CombatTracker, { type CombatEncounter } from "@/components/CombatTracker";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useLocation } from "wouter";
+import { Swords } from "lucide-react";
 
-const PARTIES = ["Arden", "Clairia", "P'Loa", "Uri-Kesh", "Doloron", "Sythwan", "Noctara", "Keer", "Waylon", "Elsewhich", "Glendeep"];
+interface CombatEncounter {
+  id: string;
+  name: string;
+  type: string;
+  partiesEncountered: number;
+  totalParties: number;
+}
 
-const INITIAL_COMBAT: Record<string, CombatEncounter[]> = {
-  "Arden": [
+export default function CombatPage() {
+  const [, setLocation] = useLocation();
+
+  const combatEncounters: CombatEncounter[] = [
     {
       id: '1',
-      name: 'Nix Valerius Combat',
-      completed: true,
-      notes: 'Party handled well, good teamwork. -CR'
+      name: 'Shadow Beast Pack',
+      type: 'Creatures',
+      partiesEncountered: 3,
+      totalParties: 6
     },
     {
       id: '2',
-      name: 'Pascal Valerius Challenge',
-      completed: false,
-      notes: ''
-    }
-  ],
-  "Clairia": [
+      name: 'Bandit Ambush',
+      type: 'Humanoid',
+      partiesEncountered: 5,
+      totalParties: 6
+    },
     {
-      id: '1',
-      name: 'Peacock Site Combat',
-      completed: false,
-      notes: ''
+      id: '3',
+      name: 'River Guardian',
+      type: 'Elemental',
+      partiesEncountered: 2,
+      totalParties: 6
+    },
+    {
+      id: '4',
+      name: 'Night Creatures',
+      type: 'Creatures',
+      partiesEncountered: 1,
+      totalParties: 6
+    },
+    {
+      id: '5',
+      name: 'Forest Spirits',
+      type: 'Magical',
+      partiesEncountered: 4,
+      totalParties: 6
+    },
+    {
+      id: '6',
+      name: 'Mountain Trolls',
+      type: 'Creatures',
+      partiesEncountered: 0,
+      totalParties: 6
+    },
+    {
+      id: '7',
+      name: 'Desert Wraiths',
+      type: 'Undead',
+      partiesEncountered: 2,
+      totalParties: 6
     }
-  ]
-};
+  ];
 
-export default function CombatPage() {
-  const [selectedParty, setSelectedParty] = useState<string>("Arden");
-  const [combatByParty, setCombatByParty] = useState<Record<string, CombatEncounter[]>>(INITIAL_COMBAT);
-
-  const currentCombat = combatByParty[selectedParty] || [];
-
-  const handlePartyChange = (party: string) => {
-    setSelectedParty(party);
-  };
-
-  const handleUpdateCombat = (id: string, updates: Partial<CombatEncounter>) => {
-    setCombatByParty(prev => ({
-      ...prev,
-      [selectedParty]: (prev[selectedParty] || []).map(combat =>
-        combat.id === id ? { ...combat, ...updates } : combat
-      )
-    }));
-  };
-
-  const handleAddCombat = (name: string) => {
-    const newCombat: CombatEncounter = {
-      id: Date.now().toString(),
-      name,
-      completed: false,
-      notes: ''
-    };
-    setCombatByParty(prev => ({
-      ...prev,
-      [selectedParty]: [...(prev[selectedParty] || []), newCombat]
-    }));
+  const handleEncounterClick = (encounterId: string) => {
+    setLocation(`/combat/${encounterId}`);
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-semibold" data-testid="heading-combat">Combat Tracker</h1>
-        <p className="text-muted-foreground">Track combat encounters not listed in the handbook</p>
+        <p className="text-muted-foreground">Track roaming combat encounters across all parties</p>
       </div>
 
-      <div className="max-w-xs">
-        <Label htmlFor="party-select" className="mb-2 block">Select Party</Label>
-        <Select value={selectedParty} onValueChange={handlePartyChange}>
-          <SelectTrigger id="party-select" data-testid="select-combat-party">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PARTIES.map(party => (
-              <SelectItem key={party} value={party}>{party}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <CombatTracker
-        party={selectedParty}
-        combatEncounters={currentCombat}
-        onUpdateCombat={handleUpdateCombat}
-        onAddCombat={handleAddCombat}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Swords className="h-5 w-5" />
+            Combat Encounters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Encounter Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Parties Encountered</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {combatEncounters.map((encounter) => (
+                  <TableRow 
+                    key={encounter.id} 
+                    className="hover-elevate"
+                    data-testid={`row-combat-${encounter.id}`}
+                  >
+                    <TableCell className="font-medium">{encounter.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{encounter.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">
+                        {encounter.partiesEncountered}/{encounter.totalParties} parties
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEncounterClick(encounter.id)}
+                        data-testid={`button-view-combat-${encounter.id}`}
+                      >
+                        Check In
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

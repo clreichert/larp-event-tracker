@@ -22,6 +22,26 @@ export default function PartyDetailPage() {
       totalCombat: 3,
       completedCombat: 2,
       openIssues: [],
+      combatEncounters: [
+        {
+          id: '1',
+          name: 'Shadow Beast Pack',
+          type: 'Creatures',
+          notes: 'Party handled well, good teamwork. -CR'
+        },
+        {
+          id: '2',
+          name: 'Bandit Ambush',
+          type: 'Humanoid',
+          notes: ''
+        },
+        {
+          id: '3',
+          name: 'River Guardian',
+          type: 'Elemental',
+          notes: ''
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -95,6 +115,20 @@ export default function PartyDetailPage() {
           situation: 'Traveler requested knee brace and wrap. Medical staff checking in at lunch.'
         }
       ],
+      combatEncounters: [
+        {
+          id: '1',
+          name: 'Shadow Beast Pack',
+          type: 'Creatures',
+          notes: 'Close call but they managed. -JS'
+        },
+        {
+          id: '2',
+          name: 'Bandit Ambush',
+          type: 'Humanoid',
+          notes: ''
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -166,6 +200,14 @@ export default function PartyDetailPage() {
           situation: 'Participant feeling light-headed, being monitored by medical staff.'
         }
       ],
+      combatEncounters: [
+        {
+          id: '2',
+          name: 'Bandit Ambush',
+          type: 'Humanoid',
+          notes: 'Struggled a bit but pulled through.'
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -211,6 +253,20 @@ export default function PartyDetailPage() {
       totalCombat: 2,
       completedCombat: 2,
       openIssues: [],
+      combatEncounters: [
+        {
+          id: '1',
+          name: 'Shadow Beast Pack',
+          type: 'Creatures',
+          notes: ''
+        },
+        {
+          id: '3',
+          name: 'River Guardian',
+          type: 'Elemental',
+          notes: ''
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -247,6 +303,14 @@ export default function PartyDetailPage() {
           situation: 'Joyce serving as companion. Schedule is clear for ongoing support.'
         }
       ],
+      combatEncounters: [
+        {
+          id: '2',
+          name: 'Bandit Ambush',
+          type: 'Humanoid',
+          notes: ''
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -265,6 +329,14 @@ export default function PartyDetailPage() {
       totalCombat: 3,
       completedCombat: 1,
       openIssues: [],
+      combatEncounters: [
+        {
+          id: '5',
+          name: 'Forest Spirits',
+          type: 'Magical',
+          notes: ''
+        }
+      ],
       encounters: [
         {
           id: '1',
@@ -420,6 +492,40 @@ export default function PartyDetailPage() {
             </CollapsibleContent>
           </Card>
         </Collapsible>
+      )}
+
+      {data.combatEncounters && data.combatEncounters.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Swords className="h-5 w-5" />
+              Combat Encounters ({data.combatEncounters.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.combatEncounters.map((combat) => (
+                <div
+                  key={combat.id}
+                  className="p-4 rounded-md border"
+                  data-testid={`combat-${combat.id}`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h4 className="font-semibold">{combat.name}</h4>
+                    <Badge variant="outline" className="text-xs">
+                      {combat.type}
+                    </Badge>
+                  </div>
+                  {combat.notes && (
+                    <p className="text-sm text-muted-foreground">
+                      {combat.notes}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <PartyPathTracker 
