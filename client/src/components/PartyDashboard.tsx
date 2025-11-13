@@ -91,7 +91,7 @@ export default function PartyDashboard({ parties }: PartyDashboardProps) {
                   <div className="flex items-center gap-2 text-sm">
                     <Swords className="h-4 w-4 text-primary" />
                     <span className="text-muted-foreground">
-                      {party.completedCombat}/{party.totalCombat} complete
+                      {party.completedCombat} {party.completedCombat === 1 ? 'encounter' : 'encounters'}
                     </span>
                   </div>
                 </div>
