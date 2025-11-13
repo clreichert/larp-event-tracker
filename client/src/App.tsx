@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import Dashboard from "@/pages/Dashboard";
 import IssuesPage from "@/pages/IssuesPage";
 import PartyPathsPage from "@/pages/PartyPathsPage";
@@ -85,7 +86,10 @@ export default function App() {
             <div className="flex flex-col flex-1 overflow-hidden">
               <header className="flex items-center justify-between px-6 py-4 border-b">
                 <SidebarTrigger data-testid="button-sidebar-toggle" />
-                <ThemeToggle />
+                <div className="flex items-center gap-2">
+                  <FeedbackButton />
+                  <ThemeToggle />
+                </div>
               </header>
               <main className="flex-1 overflow-auto">
                 <div className="container max-w-7xl mx-auto px-6 py-8">

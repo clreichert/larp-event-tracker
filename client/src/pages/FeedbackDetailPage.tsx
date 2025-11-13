@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { InsertFeedback } from "@shared/schema";
+import { useEffect } from "react";
 
 const STAKEHOLDER_NAMES = ["Ab", "Chris", "Jodi", "Kristi", "Rob", "Scaz", "Other"];
 
@@ -24,29 +24,32 @@ const FEATURE_OPTIONS = [
   "Design",
 ];
 
-interface FeedbackDetailPageProps {
-  preselectedFeature?: string;
-}
-
-export default function FeedbackDetailPage({ preselectedFeature }: FeedbackDetailPageProps) {
+export default function FeedbackDetailPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectedFeature = urlParams.get("feature") || "";
 
   const form = useForm<InsertFeedback>({
     resolver: zodResolver(insertFeedbackSchema),
     defaultValues: {
       name: "",
-      feature: preselectedFeature || "",
+      feature: preselectedFeature,
       comments: "",
     },
   });
 
+  useEffect(() => {
+    if (preselectedFeature) {
+      form.setValue("feature", preselectedFeature);
+    }
+  }, [preselectedFeature, form]);
+
   const createFeedbackMutation = useMutation({
     mutationFn: async (data: InsertFeedback) => {
-      return await apiRequest<InsertFeedback>("/api/feedback", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest("POST", "/api/feedback", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/feedback"] });
