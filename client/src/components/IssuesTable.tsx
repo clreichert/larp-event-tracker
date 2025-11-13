@@ -62,7 +62,9 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
     
     switch (sortField) {
       case 'timestamp':
-        comparison = a.timestamp.getTime() - b.timestamp.getTime();
+        const dateA = new Date(a.timestamp);
+        const dateB = new Date(b.timestamp);
+        comparison = dateA.getTime() - dateB.getTime();
         break;
       case 'party':
         comparison = a.party.localeCompare(b.party);
