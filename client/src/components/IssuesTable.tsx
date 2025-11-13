@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Edit, Search, FileText, ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { getPartyColor } from "@/lib/partyColors";
 
 export interface Issue {
   id: string;
@@ -160,18 +161,30 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedIssues.map((issue) => (
-                  <TableRow key={issue.id} className="hover-elevate" data-testid={`row-issue-${issue.id}`}>
-                    <TableCell className="whitespace-nowrap text-sm">
-                      {format(issue.timestamp, 'EEE h:mm a')}
-                    </TableCell>
-                    <TableCell className="font-medium">{issue.party}</TableCell>
-                    <TableCell>{issue.job}</TableCell>
-                    <TableCell>
-                      <Badge variant={issue.priority === "High" ? "destructive" : "secondary"}>
-                        {issue.priority}
-                      </Badge>
-                    </TableCell>
+                sortedIssues.map((issue) => {
+                  const colors = getPartyColor(issue.party);
+                  const rowClassName = `hover-elevate ${
+                    issue.priority === 'High' ? 'bg-destructive/10 dark:bg-destructive/5' : ''
+                  } ${
+                    issue.status === 'Hopefully fixed' ? 'opacity-50' : ''
+                  }`;
+                  
+                  return (
+                    <TableRow key={issue.id} className={rowClassName} data-testid={`row-issue-${issue.id}`}>
+                      <TableCell className="whitespace-nowrap text-sm">
+                        {format(issue.timestamp, 'EEE h:mm a')}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <Badge className={`${colors.bg} ${colors.text} border ${colors.border}`}>
+                          {issue.party}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{issue.job}</TableCell>
+                      <TableCell>
+                        <Badge variant={issue.priority === "High" ? "destructive" : "secondary"}>
+                          {issue.priority}
+                        </Badge>
+                      </TableCell>
                     <TableCell>
                       <Badge variant={
                         issue.status === "Hopefully fixed" ? "default" :
@@ -193,18 +206,19 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
                         <p className="text-sm text-muted-foreground line-clamp-2">{issue.situation}</p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => onEdit?.(issue)}
-                        data-testid={`button-edit-${issue.id}`}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => onEdit?.(issue)}
+                          data-testid={`button-edit-${issue.id}`}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

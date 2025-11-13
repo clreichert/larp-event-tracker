@@ -42,89 +42,82 @@ export default function PartyPathTracker({ party, encounters, onUpdateEncounter,
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{party} - Party Path</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">Status</TableHead>
-                  <TableHead>Character</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Purpose</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {encounters.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      No encounters found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  encounters.map((encounter) => (
-                    <TableRow 
-                      key={encounter.id} 
-                      className="hover-elevate"
-                      data-testid={`row-encounter-${encounter.id}`}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">Status</TableHead>
+              <TableHead>Character</TableHead>
+              <TableHead>Time</TableHead>
+              <TableHead>Purpose</TableHead>
+              <TableHead>Item</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {encounters.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  No encounters found
+                </TableCell>
+              </TableRow>
+            ) : (
+              encounters.map((encounter) => (
+                <TableRow 
+                  key={encounter.id} 
+                  className="hover-elevate"
+                  data-testid={`row-encounter-${encounter.id}`}
+                >
+                  <TableCell>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdateEncounter?.(encounter.id, { completed: !encounter.completed });
+                      }}
+                      className="hover-elevate active-elevate-2 p-1 rounded"
+                      data-testid={`button-toggle-status-${encounter.id}`}
                     >
-                      <TableCell>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onUpdateEncounter?.(encounter.id, { completed: !encounter.completed });
-                          }}
-                          className="hover-elevate active-elevate-2 p-1 rounded"
-                          data-testid={`button-toggle-status-${encounter.id}`}
-                        >
-                          {encounter.completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-chart-2" data-testid={`status-complete-${encounter.id}`} />
-                          ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground" data-testid={`status-incomplete-${encounter.id}`} />
-                          )}
-                        </button>
-                      </TableCell>
-                      <TableCell className="font-medium">{encounter.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {encounter.time || '—'}
-                      </TableCell>
-                      <TableCell className="max-w-md">
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {encounter.activity}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        {encounter.item ? (
-                          <Badge variant="default" className="text-xs">
-                            {encounter.item}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEncounterClick(encounter)}
-                          data-testid={`button-update-${encounter.id}`}
-                        >
-                          Update
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                      {encounter.completed ? (
+                        <CheckCircle2 className="h-5 w-5 text-chart-2" data-testid={`status-complete-${encounter.id}`} />
+                      ) : (
+                        <Circle className="h-5 w-5 text-muted-foreground" data-testid={`status-incomplete-${encounter.id}`} />
+                      )}
+                    </button>
+                  </TableCell>
+                  <TableCell className="font-medium">{encounter.name}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {encounter.time || '—'}
+                  </TableCell>
+                  <TableCell className="max-w-md">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {encounter.activity}
+                    </p>
+                  </TableCell>
+                  <TableCell>
+                    {encounter.item ? (
+                      <Badge variant="default" className="text-xs">
+                        {encounter.item}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEncounterClick(encounter)}
+                      data-testid={`button-update-${encounter.id}`}
+                    >
+                      Update
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Card>
         <CardHeader>
