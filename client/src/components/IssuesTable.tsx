@@ -8,18 +8,9 @@ import { Edit, Search, FileText, ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 import { getPartyColor } from "@/lib/partyColors";
+import type { Issue as IssueRecord } from "@shared/schema";
 
-export interface Issue {
-  id: string;
-  party: string;
-  job: string;
-  type: string;
-  priority: "Low" | "High";
-  status: "Monitoring" | "Fixing" | "Hopefully fixed";
-  situation: string;
-  timestamp: Date;
-  hasDetails?: boolean;
-}
+export type Issue = IssueRecord;
 
 interface IssuesTableProps {
   issues: Issue[];
@@ -165,6 +156,7 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
               ) : (
                 sortedIssues.map((issue) => {
                   const colors = getPartyColor(issue.party);
+                  const issueTimestamp = new Date(issue.timestamp);
                   const rowClassName = `hover-elevate ${
                     issue.priority === 'High' ? 'bg-destructive/10 dark:bg-destructive/5' : ''
                   } ${
@@ -174,7 +166,7 @@ export default function IssuesTable({ issues, onEdit }: IssuesTableProps) {
                   return (
                     <TableRow key={issue.id} className={rowClassName} data-testid={`row-issue-${issue.id}`}>
                       <TableCell className="whitespace-nowrap text-sm">
-                        {format(issue.timestamp, 'EEE h:mm a')}
+                        {format(issueTimestamp, 'EEE h:mm a')}
                       </TableCell>
                       <TableCell className="font-medium">
                         <Badge className={`${colors.bg} ${colors.text} border ${colors.border}`}>

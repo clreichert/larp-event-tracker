@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import type { InsertIssue } from "@shared/schema";
 
 const PARTIES = ["Arden", "Clairia", "P'Loa", "Uri-Kesh", "Doloron", "Sythwan", "Noctara", "Keer", "Waylon", "Elsewhich", "Glendeep"];
 const JOBS = ["Keeper", "Traveler", "Seeker", "Ranger", "Maker", "Caster", "Other"];
@@ -14,34 +15,30 @@ const PRIORITIES = ["Low", "High"];
 const STATUSES = ["Monitoring", "Fixing", "Hopefully fixed"];
 
 interface IssueLoggerProps {
-  onSubmit?: (issue: any) => void;
+  onSubmit?: (issue: InsertIssue) => void;
 }
 
 export default function IssueLogger({ onSubmit }: IssueLoggerProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<InsertIssue>({
     party: "",
     job: "",
     type: "",
     priority: "Low",
     status: "Monitoring",
-    situation: ""
+    situation: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Issue logged:", formData);
-    onSubmit?.({
-      ...formData,
-      timestamp: new Date(),
-      id: Math.random().toString(36).substr(2, 9)
-    });
+    onSubmit?.(formData);
     setFormData({
       party: "",
       job: "",
       type: "",
       priority: "Low",
       status: "Monitoring",
-      situation: ""
+      situation: "",
     });
   };
 

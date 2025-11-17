@@ -1,4 +1,4 @@
-import PartyDashboard from "@/components/PartyDashboard";
+import PartyDashboard, { type PartyStatus } from "@/components/PartyDashboard";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
@@ -28,12 +28,12 @@ export default function Dashboard() {
 
   const isLoading = partiesLoading || issuesLoading || encountersLoading || combatCheckinsLoading;
 
-  const dashboardData = useMemo(() => {
+  const dashboardData = useMemo<PartyStatus[]>(() => {
     if (!parties || !issues || !encounters || !combatCheckins) {
       return [];
     }
 
-    return parties.map(party => {
+    return parties.map<PartyStatus>(party => {
       const partyEncounters = encounters.filter(e => e.partyId === party.id);
       const partyIssues = issues.filter(i => i.party === party.name && i.status !== 'Resolved');
       const partyCombatCheckins = combatCheckins.filter(c => c.partyId === party.id);
@@ -45,7 +45,7 @@ export default function Dashboard() {
         totalCombat: partyCombatCheckins.length,
         completedCombat: partyCombatCheckins.filter(c => c.encountered).length,
         openIssues: partyIssues,
-        recentActivity: []
+        recentActivity: [],
       };
     });
   }, [parties, issues, encounters, combatCheckins]);
