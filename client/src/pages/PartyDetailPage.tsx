@@ -10,7 +10,7 @@ import PartyPathTracker, { type Encounter } from "@/components/PartyPathTracker"
 import { useState, useMemo } from "react";
 import { getPartyColor } from "@/lib/partyColors";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, getQueryFn, queryClient } from "@/lib/queryClient";
 import type { Party, Issue, Encounter as DBEncounter, CombatCheckin, CombatEncounter } from "@shared/schema";
 
 export default function PartyDetailPage() {
@@ -21,9 +21,10 @@ export default function PartyDetailPage() {
   const [partyPathOpen, setPartyPathOpen] = useState(true);
   const [combatOpen, setCombatOpen] = useState(true);
 
-  const { data: party, isLoading: partyLoading } = useQuery<Party>({
+  const { data: party, isLoading: partyLoading } = useQuery<Party | null>({
     queryKey: ['/api/parties', partyName],
     enabled: !!partyName,
+    queryFn: getQueryFn<Party | null>({ on401: "throw", on404: "returnNull" }),
   });
 
   const { data: encounters, isLoading: encountersLoading } = useQuery<DBEncounter[]>({

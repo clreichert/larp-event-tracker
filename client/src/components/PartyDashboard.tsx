@@ -6,25 +6,22 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, Circle, AlertCircle, Swords } from "lucide-react";
 import { useLocation } from "wouter";
 import { getPartyColor } from "@/lib/partyColors";
+import type { Issue } from "@shared/schema";
 
-interface PartyStatus {
+export interface PartyActivity {
+  id: string;
+  description: string;
+  timestamp: Date;
+}
+
+export interface PartyStatus {
   party: string;
   totalEncounters: number;
   completedEncounters: number;
   totalCombat: number;
   completedCombat: number;
-  openIssues: {
-    id: string;
-    type: string;
-    priority: "Low" | "High";
-    status: string;
-    situation: string;
-  }[];
-  recentActivity: {
-    id: string;
-    description: string;
-    timestamp: Date;
-  }[];
+  openIssues: Issue[];
+  recentActivity: PartyActivity[];
 }
 
 interface PartyDashboardProps {

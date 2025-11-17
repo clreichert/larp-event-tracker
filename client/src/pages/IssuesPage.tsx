@@ -1,8 +1,9 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import IssueLogger from "@/components/IssueLogger";
-import IssuesTable, { type Issue } from "@/components/IssuesTable";
+import IssuesTable from "@/components/IssuesTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Issue, InsertIssue } from "@shared/schema";
 
 export default function IssuesPage() {
   const { data: issues = [], isLoading } = useQuery<Issue[]>({
@@ -10,7 +11,7 @@ export default function IssuesPage() {
   });
 
   const createIssueMutation = useMutation({
-    mutationFn: async (newIssue: Omit<Issue, "id" | "timestamp">) => {
+    mutationFn: async (newIssue: InsertIssue) => {
       const response = await apiRequest("POST", "/api/issues", newIssue);
       return response.json();
     },
@@ -19,9 +20,8 @@ export default function IssuesPage() {
     },
   });
 
-  const handleLogIssue = (newIssue: Issue) => {
-    const { id, timestamp, ...issueData } = newIssue;
-    createIssueMutation.mutate(issueData);
+  const handleLogIssue = (newIssue: InsertIssue) => {
+    createIssueMutation.mutate(newIssue);
   };
 
   const handleEditIssue = (issue: Issue) => {
